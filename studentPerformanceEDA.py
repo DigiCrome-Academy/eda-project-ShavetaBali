@@ -179,5 +179,67 @@ plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 st.pyplot(fig_box)
 
 
+# ============================================================================
+# STEP 2.6: MULTIVARIATE ANALYSIS
+# ============================================================================
+st.header("Multivariate Analysis")
+st.markdown("Analyzing relationships between three or more variables.")
+
+# --- Correlation Heatmap ---
+st.subheader("Correlation Between Scores")
+st.markdown("A heatmap showing the correlation matrix of the three scores.")
+
+# Calculate the correlation matrix
+correlation_matrix = df[['math_score', 'reading_score', 'writing_score']].corr()
+
+# create a heatmap
+fig_corr,ax_corr= plt.subplots(figsize=(18,5))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f",linewidths=.5,ax=ax_corr)
+ax_corr.set_title('Correlation Matrix  of student scores')
+st.pyplot(fig_corr)
+
+# --- Grouped Bar Charts ---
+st.subheader("Mean Scores Across Multiple Categories")
+st.markdown("Comparing the average scores based on two categorical variables.")
+
+# Create sidebar filters for grouped bar chart
+st.sidebar.subheader("Grouped Bar Chart Filters")
+# Get a list of the categorical columns
+grouped_cat_cols = ['gender', 'test_preparation_course', 'lunch', 'parental_level_of_education', 'race/ethnicity']
+
+# Get a list of scores
+score_cols = ['math_score', 'reading_score', 'writing_score']
+
+# Let the user select two categorical variables
+x_var = st.sidebar.selectbox("Select first grouping variable (x-axis)", grouped_cat_cols, index=0)
+hue_var = st.sidebar.selectbox("Select second grouping variable (hue)", grouped_cat_cols, index=1)
+
+# Make sure the user selects two different variables
+if x_var == hue_var:
+    st.warning("Please select two different variables to compare.")
+else:
+    # Group the data and calculate the mean of the scores
+    grouped_data = df.groupby([x_var, hue_var])[score_cols].mean().reset_index()
+
+    # Reshape the data for a grouped bar chart
+    grouped_data_melt = grouped_data.melt(id_vars=[x_var, hue_var], var_name='score_type', value_name='mean_score')
+
+    # Create the grouped bar chart
+    fig_grouped, ax_grouped = plt.subplots(figsize=(12, 6))
+    sns.barplot(data=grouped_data_melt, x=x_var, y='mean_score', hue=hue_var, ax=ax_grouped)
+    ax_grouped.set_title(f'Mean Scores by {x_var.replace("_", " ").title()} and {hue_var.replace("_", " ").title()}')
+    ax_grouped.set_xlabel(x_var.replace("_", " ").title())
+    ax_grouped.set_ylabel("Mean Score")
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    st.pyplot(fig_grouped)
+
+st.sidebar.markdown("---")
+st.sidebar.info("Dashboard created by an experienced data science student using Streamlit.")
+
+
+
+
+
 
 
